@@ -1,12 +1,24 @@
+// 1 отправная точка
 const deadline = '2022-04-01';
-function getTimeRemaining(endtime) {
-    const t = Date.parse(endtime) - Date.parse(new Date()),
-        days = Math.floor( (t/(1000*60*60*24)) ),
-        seconds = Math.floor( (t/1000) % 60 ),
-        minutes = Math.floor( (t/1000/60) % 60 ),
-        hours = Math.floor( (t/(1000*60*60) % 24) );
 
-    return {
+//2  функция, определяющая разницу между deadLine и нашим текущим временем
+
+function getTimeRemaining(endtime) {
+    // получаем кол-во мил/сек, используя метод Date.parse
+    const t = Date.parse(endtime) - Date.parse(new Date()),
+    // кол-во дней,час,мин,сек, кот.будут отображаться в нашем таймере
+        days = Math.floor((t / (1000 * 60 * 60 * 24))),
+        hours = Math.floor((t / (1000 * 60 * 60) % 24)),
+        minutes = Math.floor(( t / 1000 / 60) % 60),
+        seconds = Math.floor((t / 1000) % 60);
+
+    // эти переменные сущ-ют только внутри этой фун-ии снаруже где-то в др.фун-ии их использовать мы не сможем, 
+    // чтобы вернуть их наружу используем оператор return, 
+    // при этом возвращаем объект и потом куда-то сможем его поместить
+        return {
+    // total-общее кол-во мил/сек в него как значение помещаю значение t. В будущем нам четко нужно будет знать 
+    // вдруг таймер уже закончился(т.е.будет отриц значение), т.е. дата к кот.мы стремились уже прошла
+    // а сейчас к примеру мы уже имеем более новую дату где кол-во милсек будет больше
         'total': t,
         'days': days,
         'hours': hours,
@@ -15,6 +27,7 @@ function getTimeRemaining(endtime) {
     };
 }
 
+// 8 добавляю нолик по красоте
 function getZero(num){
     if (num >= 0 && num < 10) { 
         return '0' + num;
@@ -23,25 +36,50 @@ function getZero(num){
     }
 }
 
+// 3 Создаем фун-ию для установки нашего таймера прям на страничку
+// понадобиться блок timer(selector) и deadline(endtime) - эти 2 аргумента я предаю для запуска фун-ии
 function setClock(selector, endtime) {
-
+// создаю пременные, в кот. буду помещать элементы со страницы
     const timer = document.querySelector(selector),
+// далее буду отталкиваться от это timer, делаю это для того, чтобы 
+// будущем была возможность создавать еще какие-то таймеры на странице
+// т.е. фун-ия будут одна, но будет вызываться для разных селекторов
+//  т.е. для каких-то разных элементов и таймеры будут тоже разные
         days = timer.querySelector("#days"),
         hours = timer.querySelector('#hours'),
         minutes = timer.querySelector('#minutes'),
         seconds = timer.querySelector('#seconds'),
+
+// 5 запускаем фун-ию updateClock каждую сек       
         timeInterval = setInterval(updateClock, 1000);
 
     updateClock();
 
+// 4 создаю фун-ию, которая будет обновлять таймер каждую секунду
     function updateClock() {
-        const t = getTimeRemaining(endtime);
+// содержит расчет того времени кот остался на эту сек
+// использую фун-ю getTimeRemaining, будет возвращать объект со всеми данными, кот сейчас буду использовать
 
+// передаю аргумент endtime-это тот deadline,кот буду передовать в setClock
+// туда просто передается аргумент, т.к. у меня фун-ия updateClock внутри находится
+//  он будет передоваться в getTimeRemaining
+        const t = getTimeRemaining(endtime);
+// когда получил разницу между планируемым временем и текущим, следущее:
+// помещаю расчетные велечины(в объекте) поместить на страницу
+
+// обращаюсь к t, в кот записывается результат работы фун-ии getTimeRemaining
+// результат ее работы-объект с разными св-ми и у них значение тех велечин, кот.меня интересуют
+
+// t.days/hours/min/sec-кол-во дней, кот. необходимо отобразить на странице
+// когда функция запутиться, она расчитает нужное мне время и на основании этих расчетов
+// будет записывать на страницу непосредственно все эти результаты
         days.innerHTML = getZero(t.days);
         hours.innerHTML = getZero(t.hours);
         minutes.innerHTML = getZero(t.minutes);
         seconds.innerHTML = getZero(t.seconds);
 
+// 7 остановка таймера когда идет в отрицательную сторону
+// это произойдет когда планируемая дата уже прошла, а по факту нахожусь в след.датах
         if (t.total <= 0) {
             clearInterval(timeInterval);
         }
@@ -49,3 +87,5 @@ function setClock(selector, endtime) {
 }
 
 setClock('.timer', deadline);
+
+
